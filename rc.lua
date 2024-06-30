@@ -367,7 +367,7 @@ globalkeys = gears.table.join(
 
     -- TODO: Add this keymapping only if hydra is available.
 
-    -- Worked with initial implementation of the module. Needed to hold super.
+    -- Worked with initial implementation of the hydra module. Needed to hold super.
     -- awful.key({ Modkey }, "r", function()
     --     hydra.start({
     --         -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
@@ -379,7 +379,9 @@ globalkeys = gears.table.join(
     --     })
     -- end),
 
-    awful.key({}, HydraModkey, function()
+    -- Worked with modified implementation of the hydra module. But was
+    -- devouring other keymappings (tmux, for example).
+    --[[ awful.key({}, HydraModkey, function()
         hydra.start({
             -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
             -- This must match the key used in your awesome key config to trigger hydra, since
@@ -394,7 +396,21 @@ globalkeys = gears.table.join(
                 }
             },
         })
-    end),
+    end), ]]
+
+    -- ## Apps.
+    awful.key({ Modkey }, "r",
+        function()
+            hydra.start({
+                -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
+                -- This must match the key used in your awesome key config to trigger hydra, since
+                -- it's used to detect when the activation key is released.
+                activation_key = "r",
+                ignored_mod = Modkey,
+                config = app_keymappings,
+            })
+        end,
+        { description = "Apps", group = "hydra" }),
 
     -- ### Awesome.
     awful.key({ Modkey, "Control" }, "r", awesome.restart,
