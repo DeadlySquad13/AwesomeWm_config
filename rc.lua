@@ -62,6 +62,11 @@ editor_cmd = terminal .. " -e " .. editor
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 Modkey = "Mod4"
+
+-- Works nicely in modified hydra implementation but Modkey-only keymappings
+-- are now only recognize Super_R - Super_L is fully devoured with hydra.
+-- Keymappings with multiple modifiers aka Modkey+Shift work though.
+HydraModkey = "Super_R"
 Altkey = "Mod1"
 local KEY = {
     left = "s",
@@ -274,21 +279,38 @@ if collision_is_available then
     })
 end
 
+
+local hydra_is_available, hydra = pcall(require, 'awesome-wm-hydra')
+
+local app_keymappings
+
+if hydra_is_available then
+    -- ## Apps.
+    -- Should be synced with other
+    -- [OS configs](https://github.com/DeadlySquad13/Keymappings__AutoHotKey_scripts/blob/main/Keymappings__/apps/apps.ahk)
+    app_keymappings = {
+        a = { "open a terminal", function() awful.spawn(terminal) end },
+    }
+end
+
+
 globalkeys = gears.table.join(
 -- * Focus in direction (globally - move even across screens).
 -- Note: better implemented in `collision`, left here just as a fallback.
-    awful.key({ Modkey }, KEY.left, function() awful.client.focus.global_bydirection("left") end,
+-- TODO: Add them if `not collision_is_available`
+--[[ awful.key({ Modkey }, KEY.left, function() awful.client.focus.global_bydirection("left") end,
         { description = "focus globally in left direction", group = "client" }),
     awful.key({ Modkey }, KEY.down, function() awful.client.focus.global_bydirection("down") end,
         { description = "focus globally in down direction", group = "client" }),
     awful.key({ Modkey }, KEY.up, function() awful.client.focus.global_bydirection("up") end,
         { description = "focus globally in up direction", group = "client" }),
     awful.key({ Modkey }, KEY.right, function() awful.client.focus.global_bydirection("right") end,
-        { description = "focus globally in right direction", group = "client" }),
+        { description = "focus globally in right direction", group = "client" }), ]]
 
-    -- * Swap in direction (globally - swaps even across screens).
-    -- Note: better implemented in `collision`, left here just as a fallback.
-    --[[ awful.key({ Modkey, "Shift" }, KEY.left, function () awful.client.swap.global_bydirection("left")    end,
+-- * Swap in direction (globally - swaps even across screens).
+-- Note: better implemented in `collision`, left here just as a fallback.
+-- TODO: Add them if `not collision_is_available`
+--[[ awful.key({ Modkey, "Shift" }, KEY.left, function () awful.client.swap.global_bydirection("left")    end,
               {description = "swap globally in left direction", group = "client"}),
     awful.key({ Modkey, "Shift" }, KEY.down, function () awful.client.swap.global_bydirection("down")    end,
               {description = "swap globally in down direction", group = "client"}),
@@ -297,7 +319,7 @@ globalkeys = gears.table.join(
     awful.key({ Modkey, "Shift" }, KEY.right, function () awful.client.swap.global_bydirection("right")    end,
               {description = "swap globally in right direction", group = "client"}), ]]
 
-    -- * Focus previous/next.
+-- * Focus previous/next.
     awful.key({ Modkey, "Control" }, "j", function() awful.screen.focus_relative(1) end,
         { description = "focus the next screen", group = "screen" }),
     awful.key({ Modkey, "Control" }, "k", function() awful.screen.focus_relative(-1) end,
@@ -308,7 +330,7 @@ globalkeys = gears.table.join(
         { description = "swap with next client by index", group = "client" }),
     awful.key({ Modkey, "Shift" }, "k", function() awful.client.swap.byidx(-1) end,
         { description = "swap with previous client by index", group = "client" }),
-    awful.key({ Modkey, }, "r", hotkeys_popup.show_help,
+    awful.key({ Modkey, "Shift" }, "r", hotkeys_popup.show_help,
         { description = "show help", group = "awesome" }),
     awful.key({ Modkey, }, "Left", awful.tag.viewprev,
         { description = "view previous", group = "tag" }),
@@ -343,11 +365,36 @@ globalkeys = gears.table.join(
         end,
         { description = "go back", group = "client" }),
 
-    -- ## Apps.
-    -- Should be synced with other
-    -- [OS configs](https://github.com/DeadlySquad13/Keymappings__AutoHotKey_scripts/blob/main/Keymappings__/apps/apps.ahk)
-    awful.key({ Modkey, }, "a", function() awful.spawn(terminal) end,
-        { description = "open a terminal", group = "launcher" }),
+    -- TODO: Add this keymapping only if hydra is available.
+
+    -- Worked with initial implementation of the module. Needed to hold super.
+    -- awful.key({ Modkey }, "r", function()
+    --     hydra.start({
+    --         -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
+    --         -- This must match the key used in your awesome key config to trigger hydra, since
+    --         -- it's used to detect when the activation key is released.
+    --         activation_key = "r",
+    --         ignored_mod = Modkey,
+    --         config = app_keymappings,
+    --     })
+    -- end),
+
+    awful.key({}, HydraModkey, function()
+        hydra.start({
+            -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
+            -- This must match the key used in your awesome key config to trigger hydra, since
+            -- it's used to detect when the activation key is released.
+            activation_key = HydraModkey,
+            ignored_mod = Modkey,
+            config = {
+                -- ## Apps.
+                r = {
+                    "apps",
+                    app_keymappings,
+                }
+            },
+        })
+    end),
 
     -- ### Awesome.
     awful.key({ Modkey, "Control" }, "r", awesome.restart,
@@ -387,7 +434,7 @@ globalkeys = gears.table.join(
     awful.key({ Altkey }, "s", function() awful.util.spawn("rofi -show combi") end,
         { description = "run prompt", group = "launcher" }),
 
-    awful.key({ Modkey }, "x",
+    awful.key({ Modkey, "Control" }, "x",
         function()
             awful.prompt.run {
                 prompt       = "Run Lua code: ",
@@ -538,7 +585,7 @@ awful.rules.rules = {
     {
         rule_any = {
             instance = {
-                "DTA", -- Firefox addon DownThemAll.
+                "DTA",   -- Firefox addon DownThemAll.
                 "copyq", -- Includes session name in class.
                 "pinentry",
             },
@@ -547,7 +594,7 @@ awful.rules.rules = {
                 "Blueman-manager",
                 "Gpick",
                 "Kruler",
-                "MessageWin", -- kalarm.
+                "MessageWin",  -- kalarm.
                 "Sxiv",
                 "Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
                 "Wpa_gui",
@@ -560,9 +607,9 @@ awful.rules.rules = {
                 "Event Tester", -- xev.
             },
             role = {
-                "AlarmWindow", -- Thunderbird's calendar.
+                "AlarmWindow",   -- Thunderbird's calendar.
                 "ConfigManager", -- Thunderbird's about:config.
-                "pop-up",  -- e.g. Google Chrome's (detached) Developer Tools.
+                "pop-up",        -- e.g. Google Chrome's (detached) Developer Tools.
             }
         },
         properties = { floating = true }
