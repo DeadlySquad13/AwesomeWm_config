@@ -69,10 +69,16 @@ Modkey = "Mod4"
 HydraModkey = "Super_R"
 Altkey = "Mod1"
 local KEY = {
-    left = "s",
-    down = "n",
-    up = "m",
-    right = "t",
+    left = { "s", "Left" },
+    down = { "n", "Down" },
+    up = { "m", "Up" },
+    right = { "t", "Right" },
+
+    next = { "f", "y" },
+    prev = { "p", "\"" },
+
+    minimize = "n",
+    maximize = "m",
 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
@@ -272,10 +278,10 @@ local collision_is_available, collision = pcall(require, "collision")
 if collision_is_available then
     collision.settings.swap_across_screen = true
     collision({
-        left = { KEY.left },
-        down = { KEY.down },
-        up = { KEY.up },
-        right = { KEY.right },
+        left = { KEY.left[1] },
+        down = { KEY.down[1] },
+        up = { KEY.up[1] },
+        right = { KEY.right[1] },
     })
 end
 
@@ -298,54 +304,54 @@ globalkeys = gears.table.join(
 -- * Focus in direction (globally - move even across screens).
 -- Note: better implemented in `collision`, left here just as a fallback.
 -- TODO: Add them if `not collision_is_available`
---[[ awful.key({ Modkey }, KEY.left, function() awful.client.focus.global_bydirection("left") end,
+--[[ awful.key({ Modkey }, KEY.left[1], function() awful.client.focus.global_bydirection("left") end,
         { description = "focus globally in left direction", group = "client" }),
-    awful.key({ Modkey }, KEY.down, function() awful.client.focus.global_bydirection("down") end,
+    awful.key({ Modkey }, KEY.down[1], function() awful.client.focus.global_bydirection("down") end,
         { description = "focus globally in down direction", group = "client" }),
-    awful.key({ Modkey }, KEY.up, function() awful.client.focus.global_bydirection("up") end,
+    awful.key({ Modkey }, KEY.up[1], function() awful.client.focus.global_bydirection("up") end,
         { description = "focus globally in up direction", group = "client" }),
-    awful.key({ Modkey }, KEY.right, function() awful.client.focus.global_bydirection("right") end,
+    awful.key({ Modkey }, KEY.right[1], function() awful.client.focus.global_bydirection("right") end,
         { description = "focus globally in right direction", group = "client" }), ]]
 
 -- * Swap in direction (globally - swaps even across screens).
 -- Note: better implemented in `collision`, left here just as a fallback.
 -- TODO: Add them if `not collision_is_available`
---[[ awful.key({ Modkey, "Shift" }, KEY.left, function () awful.client.swap.global_bydirection("left")    end,
+--[[ awful.key({ Modkey, "Shift" }, KEY.left[1], function () awful.client.swap.global_bydirection("left")    end,
               {description = "swap globally in left direction", group = "client"}),
-    awful.key({ Modkey, "Shift" }, KEY.down, function () awful.client.swap.global_bydirection("down")    end,
+    awful.key({ Modkey, "Shift" }, KEY.down[1], function () awful.client.swap.global_bydirection("down")    end,
               {description = "swap globally in down direction", group = "client"}),
-    awful.key({ Modkey, "Shift" }, KEY.up, function () awful.client.swap.global_bydirection("up")    end,
+    awful.key({ Modkey, "Shift" }, KEY.up[1], function () awful.client.swap.global_bydirection("up")    end,
               {description = "swap globally in up direction", group = "client"}),
-    awful.key({ Modkey, "Shift" }, KEY.right, function () awful.client.swap.global_bydirection("right")    end,
+    awful.key({ Modkey, "Shift" }, KEY.right[1], function () awful.client.swap.global_bydirection("right")    end,
               {description = "swap globally in right direction", group = "client"}), ]]
 
 -- * Focus previous/next.
-    awful.key({ Modkey, "Control" }, "j", function() awful.screen.focus_relative(1) end,
+    awful.key({ Modkey }, KEY.next[2], function() awful.screen.focus_relative(1) end,
         { description = "focus the next screen", group = "screen" }),
-    awful.key({ Modkey, "Control" }, "k", function() awful.screen.focus_relative(-1) end,
+    awful.key({ Modkey }, KEY.prev[2], function() awful.screen.focus_relative(-1) end,
         { description = "focus the previous screen", group = "screen" }),
 
     -- * Swap with previous/next.
-    awful.key({ Modkey, "Shift" }, "j", function() awful.client.swap.byidx(1) end,
+    awful.key({ Modkey, "Shift" }, KEY.next[1], function() awful.client.swap.byidx(1) end,
         { description = "swap with next client by index", group = "client" }),
-    awful.key({ Modkey, "Shift" }, "k", function() awful.client.swap.byidx(-1) end,
+    awful.key({ Modkey, "Shift" }, KEY.prev[1], function() awful.client.swap.byidx(-1) end,
         { description = "swap with previous client by index", group = "client" }),
     awful.key({ Modkey, "Shift" }, "r", hotkeys_popup.show_help,
         { description = "show help", group = "awesome" }),
-    awful.key({ Modkey, }, "Left", awful.tag.viewprev,
+    awful.key({ Modkey, }, KEY.left[2], awful.tag.viewprev,
         { description = "view previous", group = "tag" }),
-    awful.key({ Modkey, }, "Right", awful.tag.viewnext,
+    awful.key({ Modkey, }, KEY.right[2], awful.tag.viewnext,
         { description = "view next", group = "tag" }),
     awful.key({ Modkey, }, "Escape", awful.tag.history.restore,
         { description = "go back", group = "tag" }),
 
-    awful.key({ Modkey, }, "j",
+    awful.key({ Modkey, }, KEY.next[1],
         function()
             awful.client.focus.byidx(1)
         end,
         { description = "focus next by index", group = "client" }
     ),
-    awful.key({ Modkey, }, "k",
+    awful.key({ Modkey, }, KEY.prev[1],
         function()
             awful.client.focus.byidx(-1)
         end,
@@ -461,49 +467,50 @@ globalkeys = gears.table.join(
         end,
         { description = "lua execute prompt", group = "awesome" }),
     -- Menubar
-    awful.key({ Modkey }, "p", function() menubar.show() end,
+    awful.key({ Modkey }, "P", function() menubar.show() end,
         { description = "show the menubar", group = "launcher" })
 )
 
 clientkeys = gears.table.join(
-    awful.key({ Modkey, }, "Return",
+    awful.key({ Altkey, }, "Return",
         function(c)
             c.fullscreen = not c.fullscreen
             c:raise()
         end,
         { description = "toggle fullscreen", group = "client" }),
+    awful.key({ Modkey }, "Return", awful.client.floating.toggle,
+        { description = "toggle floating", group = "client" }),
+
     awful.key({ Modkey }, "x", function(c) c:kill() end,
         { description = "close", group = "client" }),
-    awful.key({ Modkey }, "f", awful.client.floating.toggle,
-        { description = "toggle floating", group = "client" }),
-    -- awful.key({ Modkey, "Control" }, "Return", function(c) c:swap(awful.client.getmaster()) end,
-    --     { description = "move to master", group = "client" }),
+    awful.key({ Modkey }, "g", function(c) c:swap(awful.client.getmaster()) end,
+        { description = "move to master in current layout", group = "client" }),
     awful.key({ Modkey, }, "c", function(c) c:move_to_screen() end,
         { description = "cycle move to screen", group = "client" }),
     -- awful.key({ Modkey, }, "t", function(c) c.ontop = not c.ontop end,
     --     { description = "toggle keep on top", group = "client" }),
 
     -- * Minimize / maximize.
-    awful.key({ Modkey, "Control" }, "n",
+    awful.key({ Modkey, "Control" }, KEY.minimize,
         function(c)
             -- The client currently has the input focus, so it cannot be
             -- minimized, since minimized clients can't have the focus.
             c.minimized = true
         end,
         { description = "minimize", group = "client" }),
-    awful.key({ Modkey, "Control" }, "m",
+    awful.key({ Modkey, "Control" }, KEY.maximize,
         function(c)
             c.maximized = not c.maximized
             c:raise()
         end,
         { description = "(un)maximize", group = "client" }),
-    awful.key({ Modkey, "Control", "Shift" }, "m",
+    awful.key({ Modkey, "Control", "Shift" }, KEY.maximize,
         function(c)
             c.maximized_vertical = not c.maximized_vertical
             c:raise()
         end,
         { description = "(un)maximize vertically", group = "client" }),
-    awful.key({ Modkey, "Control", "Shift" }, "m",
+    awful.key({ Modkey, "Control", "Shift" }, KEY.maximize,
         function(c)
             c.maximized_horizontal = not c.maximized_horizontal
             c:raise()
