@@ -121,6 +121,10 @@ if hydra_is_available then
                     ignored_mod = Modkey,
                     config = {
                         a = { "open a terminal", function() awful.spawn(terminal) end },
+                        t = { "timer", {
+                            n = { "next", function() awful.spawn("uairctl next") end },
+                            t = { "toggle", function() awful.spawn("uairctl toggle") end },
+                        }},
                     },
                 })
             end,
