@@ -125,6 +125,7 @@ if hydra_is_available then
                             n = { "next", function() awful.spawn("uairctl next") end },
                             t = { "toggle", function() awful.spawn("uairctl toggle") end },
                         }},
+                        i = { "browser", function () awful.spawn(BROWSER) end },
                     },
                 })
             end,

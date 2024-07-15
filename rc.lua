@@ -61,6 +61,7 @@ beautiful.init("/home/ds13/.config/awesome/theme/theme.lua")
 terminal = "wezterm"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
+BROWSER = "vivaldi"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
