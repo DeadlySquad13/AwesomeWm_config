@@ -58,10 +58,10 @@ end
 beautiful.init("/home/ds13/.config/awesome/theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "wezterm"
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = terminal .. " -e " .. editor
+TERMINAL = "wezterm"
 BROWSER = "vivaldi"
+EDITOR = os.getenv("EDITOR") or "nano"
+EDITOR_CMD = TERMINAL .. " -e " .. EDITOR
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
@@ -88,15 +88,15 @@ awful.layout.layouts = {
 -- Create a launcher widget and a main menu
 myawesomemenu = {
     { "hotkeys",     function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-    { "manual",      terminal .. " -e man awesome" },
-    { "edit config", editor_cmd .. " " .. awesome.conffile },
+    { "manual",      TERMINAL .. " -e man awesome" },
+    { "edit config", EDITOR_CMD .. " " .. awesome.conffile },
     { "restart",     awesome.restart },
     { "quit",        function() awesome.quit() end },
 }
 
 mymainmenu = awful.menu({
     items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-        { "open terminal", terminal }
+        { "open terminal", TERMINAL }
     }
 })
 
@@ -106,7 +106,7 @@ mylauncher = awful.widget.launcher({
 })
 
 -- Menubar configuration
-menubar.utils.terminal = terminal -- Set the terminal for applications that require it
+menubar.utils.TERMINAL = TERMINAL -- Set the terminal for applications that require it
 -- }}}
 
 -- Keyboard map indicator and switcher
