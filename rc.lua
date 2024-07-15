@@ -18,6 +18,12 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
+local Screen = {
+    Left = 2,
+    Center = 1,
+    Right = 3,
+}
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -270,7 +276,8 @@ awful.rules.rules = {
                 "Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
                 "Wpa_gui",
                 "veromix",
-                "xtightvncviewer" },
+                "xtightvncviewer",
+            },
 
             -- Note that the name property shown in xprop might be set slightly after creation of the client
             -- and the name shown there might not match defined rules here.
@@ -293,9 +300,23 @@ awful.rules.rules = {
         properties = { titlebars_enabled = false }
     },
 
-    -- Set Firefox to always map on the tag named "2" on screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { screen = 1, tag = "2" } },
+    {
+        rule = { class = "Yad" },
+        properties = {
+            floating = true,
+            minimized_vertical = true,
+            minimized_horizontal = true,
+            width = 240,
+            height = 120,
+            ontop = true,
+            screen = Screen.Right,
+            -- Doesn't work for some reason.
+            -- Setting '* { opacity: 0.3; }' in yad doesn't work either: it
+            -- just changes opacity of the text.
+            opacity = 0.3,
+            tag = "1",
+        }
+    },
 }
 -- }}}
 
@@ -305,6 +326,13 @@ client.connect_signal("manage", function(c)
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
+
+    -- print(c)
+    --[[ print("Client:")
+    gears.debug.dump(c.name, "- name")
+    gears.debug.dump(c.class, "- class")
+    gears.debug.dump(c.role, "- role")
+    gears.debug.dump(c.instance, "- instance") ]]
 
     if awesome.startup
         and not c.size_hints.user_position
