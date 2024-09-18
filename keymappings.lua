@@ -1,6 +1,7 @@
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
+local naughty = require("naughty")
 require("awful.autofocus")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
@@ -23,16 +24,19 @@ local KEY = {
     up = { "m", "Up" },
     right = { "t", "Right" },
 
-    next = { "f", "y" },
-    prev = { "p", "\"" },
+    next = { "p", "y" },
+    prev = { "f", "\"" },
 
-    minimize = "n",
-    maximize = "m",
+    minimize = ".",
+    maximize = "u",
+
+    screen = { "o" },
+    apps = { "r" },
 }
 
 
 local globalkeys = gears.table.join(
-    awful.key({ Modkey, "Control" }, KEY.minimize,
+    awful.key({ Modkey, "Shift" }, KEY.minimize,
         function()
             local c = awful.client.restore()
             -- Focus restored client
@@ -91,6 +95,48 @@ local appkeys = gears.table.join(
     awful.key({ Modkey, "Shift" }, "q", awesome.quit,
         { description = "quit awesome", group = "awesome" })
 )
+
+-- Add swap functionality listeners to each screen.
+awful.screen.connect_for_each_screen(function(s)
+    -- [...]
+    s:connect_signal("swapped", function(self, other, is_source)
+        if not is_source then return end
+
+        local st = self.selected_tag
+        local sc = st:clients() -- NOTE: this is only here for convinience
+        local ot = other.selected_tag
+        local oc = ot:clients() -- but this HAS to be saved in a variable because we modify the client list in the process of swapping
+
+        for _, c in ipairs(sc) do
+            c:move_to_tag(ot)
+        end
+
+        for _, c in ipairs(oc) do
+            c:move_to_tag(st)
+        end
+    end)
+    -- [...]
+end)
+
+--- Currently supports only left and right.
+---@param direction 'left' | 'right'
+local function swap_screens(direction)
+    local focused_screen = awful.screen.focused()
+    local s = focused_screen.get_next_in_direction(focused_screen, direction == "left" and "left" or "right")
+
+    -- Go to opposite direction if we've hit the border.
+    -- FIXME: this only makes sense for two screens
+    if not s then
+        s = focused_screen.get_next_in_direction(focused_screen, direction == "left" and "right" or "left")
+    end
+
+    if not s then
+        naughty.notify { preset = naughty.config.presets.critical, title = "could not get other screen" }
+        return
+    end
+    focused_screen:swap(s)
+end
+
 local hydra_is_available, hydra = pcall(require, 'awesome-wm-hydra')
 
 if hydra_is_available then
@@ -111,36 +157,50 @@ if hydra_is_available then
         --     })
         -- end),
 
-        awful.key({ Modkey }, "r",
+        awful.key({ Modkey }, KEY.apps[1],
             function()
                 hydra.start({
                     -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
                     -- This must match the key used in your awesome key config to trigger hydra, since
                     -- it's used to detect when the activation key is released.
-                    activation_key = "r",
+                    activation_key = KEY.apps[1],
                     ignored_mod = Modkey,
                     config = {
                         a = { "open a terminal", function() awful.spawn(TERMINAL) end },
                         t = { "timer", {
                             n = { "next", function() awful.spawn("uairctl next") end },
                             t = { "toggle", function() awful.spawn("uairctl toggle") end },
-                        }},
-                        i = { "browser", function () awful.spawn(BROWSER) end },
+                        } },
+                        i = { "browser", function() awful.spawn(BROWSER) end },
                     },
                 })
             end,
-            { description = "Apps", group = "hydra" })
+            { description = "Start Apps hydra", group = "apps" }),
+
+        awful.key({ Modkey }, KEY.screen[1],
+            function()
+                hydra.start({
+                    -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
+                    -- This must match the key used in your awesome key config to trigger hydra, since
+                    -- it's used to detect when the activation key is released.
+                    activation_key = KEY.screen[1],
+                    ignored_mod = Modkey,
+                    config = {
+                        -- * Swap screens in direction.
+                        [KEY.left[1]] = { "swap screen with the left one", function() swap_screens("left") end },
+                        [KEY.down[1]] = { "swap screen with the bottom one", function() swap_screens("left") end },
+                        [KEY.up[1]] = { "swap screen with the upper one", function() swap_screens("left") end },
+                        [KEY.right[1]] = { "swap screen with the right one", function() swap_screens("right") end },
+
+                        -- * Focus previous/next screen.
+                        [KEY.prev[2]] = { "focus the previous screen", function() awful.screen.focus_relative(-1) end },
+                        [KEY.next[2]] = { "focus the next screen", function() awful.screen.focus_relative(1) end },
+                    },
+                })
+            end,
+            { description = "Start Screen hydra", group = "screen" })
     )
 end
-
-
-local screenkeys = gears.table.join(
--- * Focus previous/next.
-    awful.key({ Modkey }, KEY.next[2], function() awful.screen.focus_relative(1) end,
-        { description = "focus the next screen", group = "screen" }),
-    awful.key({ Modkey }, KEY.prev[2], function() awful.screen.focus_relative(-1) end,
-        { description = "focus the previous screen", group = "screen" })
-)
 
 -- ## Tags.
 -- Some are defined via collision in 'Clients (windows)'.
@@ -209,18 +269,18 @@ end
 -- ## Clients (windows).
 local client_window_keys = gears.table.join(
 -- * Swap with previous/next.
-    awful.key({ Modkey, "Shift" }, KEY.next[1], function() awful.client.swap.byidx(1) end,
+    awful.key({ Modkey, "Shift" }, KEY.next[2], function() awful.client.swap.byidx(1) end,
         { description = "swap with next client by index", group = "client" }),
-    awful.key({ Modkey, "Shift" }, KEY.prev[1], function() awful.client.swap.byidx(-1) end,
+    awful.key({ Modkey, "Shift" }, KEY.prev[2], function() awful.client.swap.byidx(-1) end,
         { description = "swap with previous client by index", group = "client" }),
 
-    awful.key({ Modkey, }, KEY.next[1],
+    awful.key({ Modkey, }, KEY.next[2],
         function()
             awful.client.focus.byidx(1)
         end,
         { description = "focus next by index", group = "client" }
     ),
-    awful.key({ Modkey, }, KEY.prev[1],
+    awful.key({ Modkey, }, KEY.prev[2],
         function()
             awful.client.focus.byidx(-1)
         end,
@@ -228,8 +288,8 @@ local client_window_keys = gears.table.join(
     ),
     awful.key({ Modkey, }, "w", function() mymainmenu:show() end,
         { description = "show main menu", group = "awesome" }),
-    awful.key({ Modkey, }, "u", awful.client.urgent.jumpto,
-        { description = "jump to urgent client", group = "client" }),
+    -- awful.key({ Modkey, }, "u", awful.client.urgent.jumpto,
+    --     { description = "jump to urgent client", group = "client" }),
 
     awful.key({ Modkey, }, "Tab",
         function()
@@ -300,7 +360,6 @@ end
 
 globalkeys = gears.table.join(
     globalkeys,
-    screenkeys,
     layoutkeys,
     tagkeys,
     client_window_keys,
@@ -319,36 +378,42 @@ local clientkeys = gears.table.join(
 
     awful.key({ Modkey }, "x", function(c) c:kill() end,
         { description = "close", group = "client" }),
+
     awful.key({ Modkey }, "g", function(c) c:swap(awful.client.getmaster()) end,
         { description = "move to master in current layout", group = "client" }),
-    awful.key({ Modkey, }, "c", function(c) c:move_to_screen() end,
-        { description = "cycle move to screen", group = "client" }),
+
+    -- * Move clien to previous/next screen.
+    awful.key({ Modkey, "Shift" }, KEY.prev[1], function(c) c:move_to_screen(c.screen.index + 1) end,
+        { description = "move client to previous screen", group = "client" }),
+    awful.key({ Modkey, "Shift" }, KEY.next[1], function(c) c:move_to_screen(c.screen.index - 1) end,
+        { description = "move client to next screen", group = "client" }),
+
     -- awful.key({ Modkey, }, "t", function(c) c.ontop = not c.ontop end,
     --     { description = "toggle keep on top", group = "client" }),
 
     -- * Minimize / maximize.
-    awful.key({ Modkey, "Control" }, KEY.minimize,
+    awful.key({ Modkey }, KEY.minimize,
         function(c)
             -- The client currently has the input focus, so it cannot be
             -- minimized, since minimized clients can't have the focus.
             c.minimized = true
         end,
         { description = "minimize", group = "client" }),
-    awful.key({ Modkey, "Control" }, KEY.maximize,
+    awful.key({ Modkey }, KEY.maximize,
         function(c)
             c.maximized = not c.maximized
             c:raise()
         end,
         { description = "(un)maximize", group = "client" }),
-    awful.key({ Modkey, "Control", "Shift" }, KEY.maximize,
+    awful.key({ Modkey, "Shift" }, KEY.maximize,
         function(c)
             c.maximized_vertical = not c.maximized_vertical
             c:raise()
         end,
         { description = "(un)maximize vertically", group = "client" }),
-    awful.key({ Modkey, "Control", "Shift" }, KEY.maximize,
+    awful.key({ Modkey, "Alt" }, KEY.maximize,
         function(c)
-            c.maximized_horizontal = not c.maximized_horizontal
+            c.maximized_horizontal = not c.maximized
             c:raise()
         end,
         { description = "(un)maximize horizontally", group = "client" })
