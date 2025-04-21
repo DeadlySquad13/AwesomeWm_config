@@ -96,6 +96,7 @@ local appkeys = gears.table.join(
         { description = "quit awesome", group = "awesome" })
 )
 
+-- ## Screens (monitors).
 -- Add swap functionality listeners to each screen.
 awful.screen.connect_for_each_screen(function(s)
     -- [...]
@@ -117,6 +118,7 @@ awful.screen.connect_for_each_screen(function(s)
     end)
     -- [...]
 end)
+local screenkeys = {}
 
 --- Currently supports only left and right.
 ---@param direction 'left' | 'right'
@@ -143,6 +145,19 @@ if hydra_is_available then
     -- ## Apps.
     -- Should be synced with other
     -- [OS configs](https://github.com/DeadlySquad13/Keymappings__AutoHotKey_scripts/blob/main/Keymappings__/apps/apps.ahk)
+    local beautiful = require("beautiful")
+    local theme = beautiful.get()
+
+    -- See: https://github.com/TommyX12/awesome-wm-hydra#:~:text=Key%20hint%20theme%20customizations%3A
+    local hydra_theme = {
+        key_fg = theme.fg_normal,
+        key_bg = theme.bg_normal,
+        nested_fg = theme.fg_primary,
+        focused_fg = theme.fg_secondary,
+        activation_fg = theme.fg_tertiary,
+    }
+
+    local function hydra_start(settings) hydra.start(gears.table.join(hydra_theme, settings)) end
 
     appkeys = gears.table.join(appkeys,
         -- Worked with initial implementation of the hydra module. Needed to hold super.
@@ -159,7 +174,7 @@ if hydra_is_available then
 
         awful.key({ Modkey }, KEY.apps[1],
             function()
-                hydra.start({
+                hydra_start({
                     -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
                     -- This must match the key used in your awesome key config to trigger hydra, since
                     -- it's used to detect when the activation key is released.
@@ -175,11 +190,13 @@ if hydra_is_available then
                     },
                 })
             end,
-            { description = "Start Apps hydra", group = "apps" }),
+            { description = "Start Apps hydra", group = "apps" })
+        )
 
+    screenkeys = gears.table.join(screenkeys,
         awful.key({ Modkey }, KEY.screen[1],
             function()
-                hydra.start({
+                hydra_start({
                     -- activation_key: The trigger key. This is not a key ID, but a AwesomeWM key name.
                     -- This must match the key used in your awesome key config to trigger hydra, since
                     -- it's used to detect when the activation key is released.
@@ -362,6 +379,7 @@ globalkeys = gears.table.join(
     globalkeys,
     layoutkeys,
     tagkeys,
+    screenkeys,
     client_window_keys,
     appkeys
 )
