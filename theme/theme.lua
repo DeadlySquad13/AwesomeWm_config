@@ -1,6 +1,7 @@
 -------------------------------
 --  "Zenburn" awesome theme  --
 --    By Adrian C. (anrxc)   --
+-- Modified by DeadlySquad13 --
 -------------------------------
 
 local themes_path = require("gears.filesystem").get_themes_dir()
@@ -56,6 +57,9 @@ theme.titlebar_bg_normal = "#3F3F3F"
 --theme.fg_end_widget    = "#FF5656"
 --theme.bg_widget        = "#494B4F"
 --theme.border_widget    = "#3F3F3F"
+theme.fg_primary  = "#DDDDDD"
+theme.fg_secondary  = "#EDE2CC"
+theme.fg_tertiary = "#EDE2CC"
 -- }}}
 
 -- {{{ Mouse finder
