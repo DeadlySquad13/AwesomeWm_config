@@ -84,6 +84,15 @@ awful.layout.layouts = {
 }
 -- }}}
 
+-- {{{ Start .desktop entrie in users's autostart directory.
+-- https://wiki.archlinux.org/title/Awesome#Autostart
+awful.spawn.with_shell(
+    'if (xrdb -query | grep -q "^awesome\\.started:\\s*true$"); then exit; fi;' ..
+    'xrdb -merge <<< "awesome.started:true";' ..
+    'dex --environment Awesome --autostart --search-paths "${XDG_CONFIG_HOME:-$HOME/.config}/autostart:${XDG_CONFIG_DIRS:-/etc/xdg}/autostart";'
+    )
+-- }}}
+
 -- {{{ Menu
 -- Create a launcher widget and a main menu
 myawesomemenu = {
