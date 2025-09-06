@@ -185,7 +185,21 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+    local default_layout = awful.layout.layouts[1]
+
+    -- - Left screen (LG).
+    if s.index == 1 then
+        awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, default_layout)
+    -- - Middle screen (LOC).
+    elseif s.index == 2 then
+        awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, default_layout)
+    -- - Right screen (DELL, portrait).
+    elseif s.index == 3 then
+        local messenger_tag = "1"
+
+        awful.tag.add(messenger_tag, { screen = s, layout = awful.layout.suit.tile.top })
+        awful.tag({ "2", "3", "4", "5", "6", "7", "8", "9" }, s, default_layout)
+    end
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
