@@ -141,6 +141,24 @@ end
 
 local hydra_is_available, hydra = pcall(require, 'awesome-wm-hydra')
 
+local revelation_is_available, revelation = pcall(require, 'revelation')
+if revelation_is_available then
+    -- Directly stolen from my leap config in NeoVim.
+    local labels = {
+        't', 'a', 'n', 'e', 's', 'i', 'r', 'h',
+        'd', 'u', 'l', 'o', 'c', 'y', 'x', 'k',
+        'p', '.', 'm', 'q', 'f', '"', 'w', '\'',
+        'T', 'A', 'N', 'E', 'S', 'I', 'R', 'H',
+        'D', 'U', 'L', 'O', 'C', 'Y', 'X', 'K',
+        'P', ':', 'M', 'Q', 'F', '[', 'W', ']',
+    }
+
+    revelation.init({
+        -- Expected in string format.
+        charorder = table.concat(labels),
+    })
+end
+
 if hydra_is_available then
     -- ## Apps.
     -- Should be synced with other
@@ -158,6 +176,21 @@ if hydra_is_available then
     }
 
     local function hydra_start(settings) hydra.start(gears.table.join(hydra_theme, settings)) end
+
+    local apps_hydra_config = {
+        a = { "open a terminal", function() awful.spawn(TERMINAL) end },
+        t = { "timer", {
+            n = { "next", function() awful.spawn("uairctl next") end },
+            t = { "toggle", function() awful.spawn("uairctl toggle") end },
+        } },
+        i = { "browser", function() awful.spawn(BROWSER) end },
+    }
+
+    if revelation_is_available then
+        apps_hydra_config = gears.table.join(apps_hydra_config,
+            { [KEY.screen[1]] = { "[Revelation] Choose app from all tags", function() revelation() end } }
+        )
+    end
 
     appkeys = gears.table.join(appkeys,
         -- Worked with initial implementation of the hydra module. Needed to hold super.
@@ -180,18 +213,11 @@ if hydra_is_available then
                     -- it's used to detect when the activation key is released.
                     activation_key = KEY.apps[1],
                     ignored_mod = Modkey,
-                    config = {
-                        a = { "open a terminal", function() awful.spawn(TERMINAL) end },
-                        t = { "timer", {
-                            n = { "next", function() awful.spawn("uairctl next") end },
-                            t = { "toggle", function() awful.spawn("uairctl toggle") end },
-                        } },
-                        i = { "browser", function() awful.spawn(BROWSER) end },
-                    },
+                    config = apps_hydra_config,
                 })
             end,
             { description = "Start Apps hydra", group = "apps" })
-        )
+    )
 
     screenkeys = gears.table.join(screenkeys,
         awful.key({ Modkey }, KEY.screen[1],
@@ -216,6 +242,12 @@ if hydra_is_available then
                 })
             end,
             { description = "Start Screen hydra", group = "screen" })
+    )
+end
+
+if revelation_is_available then
+    appkeys = gears.table.join(appkeys,
+        awful.key({ Modkey }, "e", function() revelation({ rule = { class = "conky" }, is_excluded = true }) end)
     )
 end
 
@@ -396,7 +428,6 @@ local clientkeys = gears.table.join(
 
     awful.key({ Modkey }, "x", function(c) c:kill() end,
         { description = "close", group = "client" }),
-
     awful.key({ Modkey }, "g", function(c) c:swap(awful.client.getmaster()) end,
         { description = "move to master in current layout", group = "client" }),
 
