@@ -75,10 +75,10 @@ awful.layout.layouts = {
     awful.layout.suit.spiral,
     awful.layout.suit.spiral.dwindle,
     awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
+    -- awful.layout.suit.max.fullscreen, -- Hard to exit from without keymapping.
     awful.layout.suit.magnifier,
-    awful.layout.suit.corner.nw,
-    -- awful.layout.suit.corner.ne,
+    -- awful.layout.suit.corner.nw,
+    awful.layout.suit.corner.ne,
     -- awful.layout.suit.corner.sw,
     -- awful.layout.suit.corner.se,
 }
@@ -199,6 +199,9 @@ awful.screen.connect_for_each_screen(function(s)
 
         awful.tag.add(messenger_tag, { screen = s, layout = awful.layout.suit.tile.top })
         awful.tag({ "2", "3", "4", "5", "6", "7", "8", "9" }, s, default_layout)
+
+        -- Otherwise first in the last added group will be selected (2nd).
+        s.tags[1].selected = true
     end
 
     -- Create a promptbox for each screen
@@ -324,6 +327,7 @@ awful.rules.rules = {
         properties = { titlebars_enabled = false }
     },
 
+    -- Custom.
     {
         rule = { class = "Yad" },
         properties = {
