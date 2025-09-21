@@ -184,6 +184,10 @@ if hydra_is_available then
             t = { "toggle", function() awful.spawn("uairctl toggle") end },
         } },
         i = { "browser", function() awful.spawn(BROWSER) end },
+        q = { "knowledge base", {
+            r = { "reference Manager", function() awful.spawn(REFERENCE_MANAGER) end },
+            z = { "zotero", function() awful.spawn(ZOTERO) end },
+        } },
     }
 
     if revelation_is_available then

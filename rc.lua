@@ -60,6 +60,8 @@ beautiful.init("/home/ds13/.config/awesome/theme/theme.lua")
 -- This is used later as the default terminal and editor to run.
 TERMINAL = "wezterm"
 BROWSER = "vivaldi"
+ZOTERO = "gl-zotero"
+REFERENCE_MANAGER = ZOTERO
 EDITOR = os.getenv("EDITOR") or "nano"
 EDITOR_CMD = TERMINAL .. " -e " .. EDITOR
 
@@ -202,6 +204,10 @@ awful.screen.connect_for_each_screen(function(s)
 
         -- Otherwise first in the last added group will be selected (2nd).
         s.tags[1].selected = true
+        -- It appears that two tags can be selected simultaneously :D (though
+        -- functionality wise only first will be really selected and used for
+        -- opening windows).
+        s.tags[2].selected = false
     end
 
     -- Create a promptbox for each screen
