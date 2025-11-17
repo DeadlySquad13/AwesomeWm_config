@@ -1,3 +1,6 @@
 [submodule "revelation"]
 	path = revelation
 	url = https://github.com/guotsuan/awesome-revelation
+[submodule "fancy_taglist"]
+	path = fancy_taglist
+	url = https://gist.github.com/DeadlySquad13/b7e9f711e0c31230327958aef454ea87
