@@ -188,6 +188,10 @@ if hydra_is_available then
             r = { "reference Manager", function() awful.spawn(REFERENCE_MANAGER) end },
             z = { "zotero", function() awful.spawn(ZOTERO) end },
         } },
+        -- INFO: It's `i otp | y` with ~/.invoke.yml that points search_root to
+        -- the shared-scripts.
+        -- TODO: Remove `with_shell` when pipe won't be needed.
+        w = { "work otp", function() awful.spawn.with_shell("invoke otp | xclip -selection clipboard") end },
         h = { "messenger", {
             d = { "discord", function() awful.spawn("proxychains4 discord") end },
             t = { "telegram", function() awful.spawn("gl-telegram-desktop") end },
