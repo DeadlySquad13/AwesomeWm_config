@@ -188,6 +188,11 @@ if hydra_is_available then
             r = { "reference Manager", function() awful.spawn(REFERENCE_MANAGER) end },
             z = { "zotero", function() awful.spawn(ZOTERO) end },
         } },
+        h = { "messenger", {
+            d = { "discord", function() awful.spawn("proxychains4 discord") end },
+            t = { "telegram", function() awful.spawn("gl-telegram-desktop") end },
+            m = { "matrix (element)", function() awful.spawn("gl-element-desktop") end },
+        } },
     }
 
     if revelation_is_available then
